@@ -320,7 +320,7 @@ class DSpace(models.Model):
         LOGGER.info('Statement: %s', statement.xml_document)
 
         # Get DSpace handle
-        regex = r'bitstream/(?P<handle>\d+/\d+)/'  # get Dspace handle regex
+        regex = r'bitstream/(?P<handle>(\d+|\d+\.\d+|TEMP-BOGUS)/\d+)/'  # get Dspace handle regex
         match = re.search(regex, statement.original_deposits[0].id)
         if match:
             LOGGER.info('Handle: %s', match.group('handle'))
