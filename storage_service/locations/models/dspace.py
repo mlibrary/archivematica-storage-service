@@ -337,24 +337,21 @@ class DSpace(models.Model):
 
         # Set permissions on metadata bitstreams
         self._set_permissions(package)
-
     def _set_permissions(self, package):
         try:
             handle = package.misc_attributes['handle']
         except KeyError:
             LOGGER.warning('Cannot update permissions - package handle unknown')
             return
-
         # Only set if policy exists
         if not self.metadata_policy:
             LOGGER.info('Restricted metadata policy is empty (%s), not setting', self.metadata_policy)
             return
-
         # Set bitstream permissions for bitstreams attached to handle
         parsed_url = urlparse.urlparse(self.sd_iri)
         dspace_url = urlparse.urlunparse((parsed_url.scheme, parsed_url.netloc, '', '', '', ''))
         # Log in to get DSpace REST API token
-        url = dspace_url + '/rest/login'
+        url = dspace_url + '/RESTapi/login'
         body = {'email': self.user, 'password': self.password}
         try:
             response = requests.post(url, json=body)
@@ -362,9 +359,8 @@ class DSpace(models.Model):
             LOGGER.warning('Error logging in to DSpace REST API, aborting', exc_info=True)
             return
         rest_token = response.text
-
         # Fetch bitstream information for item
-        url = dspace_url + '/rest/handle/' + handle
+        url = dspace_url + '/RESTapi/handle/' + handle
         headers = {
             'Accept': 'application/json',
             'rest-dspace-token': rest_token,
@@ -400,9 +396,8 @@ class DSpace(models.Model):
                 LOGGER.warning('Error posting bitstream body', exc_info=True)
                 continue
             LOGGER.debug('Response: %s %s', response.status_code, response.text)
-
         # Logout from DSpace API
-        url = dspace_url + '/rest/logout'
+        url = dspace_url + '/RESTapi/logout'
         try:
             requests.post(url, headers=headers)
         except Exception:
