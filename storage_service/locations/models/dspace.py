@@ -415,6 +415,7 @@ class DSpace(models.Model):
             except Exception:
                 LOGGER.warning('Error updating license bitstream body', exc_info=True)
                 continue
+            LOGGER.debug('Response: %s %s', response.status_code, response.text)
                 
         except Exception:
             LOGGER.warning('Error posting license bitstream', exc_info=True)
