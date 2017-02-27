@@ -393,6 +393,34 @@ class DSpace(models.Model):
                 LOGGER.warning('Error posting bitstream body', exc_info=True)
                 continue
             LOGGER.debug('Response: %s %s', response.status_code, response.text)
+        
+        # Add license bundle
+        item = response.json()
+        url = dspace_url + '/RESTapi/items/' + str(item['id']) + '/bitstreams'
+        with open('dspace-license.txt', mode='r') as f:
+            data = f.read()
+        LOGGER.debug('Posting license bitstream')
+        try:
+            response = requests.post(url, headers=headers, data=data)
+            
+            # Updating bitream name and bundle name
+            bitstream = response.json()
+            bitstream['name'] = 'license.txt'
+            bitstream['bundleName'] = 'LICENSE'
+            url = dspace_url + '/RESTapi/bitstreams/' + str(bitstream['id'])
+            body = bitstream
+            LOGGER.debug('Updating license bitstream body %s', body)
+            try:
+                response = requests.put(url, headers=headers, json=body)
+            except Exception:
+                LOGGER.warning('Error updating license bitstream body', exc_info=True)
+                continue
+                
+        except Exception:
+            LOGGER.warning('Error posting license bitstream', exc_info=True)
+            continue
+        LOGGER.debug('Response: %s %s', response.status_code, response.text)
+            
         # Logout from DSpace API
         url = dspace_url + '/RESTapi/logout'
         try:
