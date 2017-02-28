@@ -402,6 +402,7 @@ class DSpace(models.Model):
         LOGGER.debug('Posting license bitstream')
         try:
             response = requests.post(url, headers=headers, data=data)
+            LOGGER.debug('Response: %s %s', response.status_code, response.text)
             
             # Updating bitream name and bundle name
             bitstream = response.json()
@@ -412,15 +413,12 @@ class DSpace(models.Model):
             LOGGER.debug('Updating license bitstream body %s', body)
             try:
                 response = requests.put(url, headers=headers, json=body)
+                LOGGER.debug('Response: %s %s', response.status_code, response.text)
             except Exception:
                 LOGGER.warning('Error updating license bitstream body', exc_info=True)
-                continue
-            LOGGER.debug('Response: %s %s', response.status_code, response.text)
                 
         except Exception:
             LOGGER.warning('Error posting license bitstream', exc_info=True)
-            continue
-        LOGGER.debug('Response: %s %s', response.status_code, response.text)
             
         # Logout from DSpace API
         url = dspace_url + '/RESTapi/logout'
