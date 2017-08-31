@@ -382,7 +382,7 @@ class DSpace(models.Model):
                 # Overwrite existing policies, instead of adding
                 body['policies'] = self.metadata_policy
                 # Add bitstream description for metadata when depositing to DSpace
-                body['description'] = 'Administrative information.'
+                body['description'] = 'Administrative information. Access restricted to Bentley staff.'
             elif bitstream['name'] in ['objects.7z', 'objects.zip']:
                 # Add bitstream description for objects when depositing to DSpace
                 body['description'] = 'Archival materials.'
