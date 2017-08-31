@@ -397,7 +397,7 @@ class DSpace(models.Model):
         # Add license bundle
         item = response.json()
         url = dspace_url + '/RESTapi/items/' + str(item['id']) + '/bitstreams'
-        with open('dspace-license.txt', mode='r') as f:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "dspace-license.txt"), mode='r') as f:
             data = f.read()
         LOGGER.debug('Posting license bitstream')
         try:
