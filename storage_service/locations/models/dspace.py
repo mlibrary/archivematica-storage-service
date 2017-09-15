@@ -365,22 +365,23 @@ class DSpace(models.Model):
         params = {'expand': 'bitstreams'}
         try:
             response = requests.get(url, headers=headers, params=params)
+            item = response.json()
         except Exception:
             LOGGER.warning('Error fetching bitstream information for handle %s', handle, exc_info=True)
         LOGGER.debug('REST API handle mapping %s %s', response.status_code, response)
         LOGGER.debug('Body %s', response.json())
 
         # Update bitstream policies & descriptions through REST API
-        for bitstream in response.json()['bitstreams']:
+        for bitstream in item['bitstreams']:
             url = dspace_url + bitstream['link']
             LOGGER.debug('Bitstream policy URL %s', url)
             body = bitstream
-            if bitstream['name'] == 'metadata.7z':
+            if bitstream['name'] in ['metadata.7z', 'metadata.zip']:
                 # Overwrite existing policies, instead of adding
                 body['policies'] = self.metadata_policy
                 # Add bitstream description for metadata when depositing to DSpace
-                body['description'] = 'Administrative information.'
-            elif bitstream['name'] == 'objects.7z':
+                body['description'] = 'Administrative information. Access restricted to Bentley staff.'
+            elif bitstream['name'] in ['objects.7z', 'objects.zip']:
                 # Add bitstream description for objects when depositing to DSpace
                 body['description'] = 'Archival materials.'
             else:
@@ -388,16 +389,15 @@ class DSpace(models.Model):
                 continue
             LOGGER.debug('Posting bitstream body %s', body)
             try:
-                response = requests.put(url, headers=headers, json=body)
+                requests.put(url, headers=headers, json=body)
             except Exception:
                 LOGGER.warning('Error posting bitstream body', exc_info=True)
                 continue
             LOGGER.debug('Response: %s %s', response.status_code, response.text)
         
         # Add license bundle
-        item = response.json()
         url = dspace_url + '/RESTapi/items/' + str(item['id']) + '/bitstreams'
-        with open('dspace-license.txt', mode='r') as f:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dspace-license.txt'), mode='r') as f:
             data = f.read()
         LOGGER.debug('Posting license bitstream')
         try:
