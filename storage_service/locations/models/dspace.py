@@ -277,27 +277,27 @@ class DSpace(models.Model):
             LOGGER.info('Add file %s to %s', upload_path, entry_receipt.edit_media)
             # Add file to DSpace item
             with open(upload_path, 'r') as f:
-                content = f.read()  # sword2 iterates over this twice
+                # content = f.read()  # sword2 iterates over this twice
 
-            # Note: This has problems because httplib2 tries all requests using basic auth without any auth and retries after getting a 401. This breaks with files over 2097152 bytes.
-            # A possible solution is to use a different http_impl in the connection, but that returns incorrect URIs in the deposit recept
-            # LOGGER.debug('Using sword2')
-            # self.sword_connection.add_file_to_resource(
-            #     edit_media_iri=entry_receipt.edit_media,
-            #     payload=content,
-            #     filename=os.path.basename(upload_path),
-            #     mimetype=mimetypes.guess_type(upload_path),
-            # )
+                # Note: This has problems because httplib2 tries all requests using basic auth without any auth and retries after getting a 401. This breaks with files over 2097152 bytes.
+                # A possible solution is to use a different http_impl in the connection, but that returns incorrect URIs in the deposit recept
+                # LOGGER.debug('Using sword2')
+                # self.sword_connection.add_file_to_resource(
+                #     edit_media_iri=entry_receipt.edit_media,
+                #     payload=content,
+                #     filename=os.path.basename(upload_path),
+                #     mimetype=mimetypes.guess_type(upload_path),
+                # )
 
-            # This replicates the sword2 behaviour but using requests for the basic auth
-            LOGGER.debug('Using requests')
-            headers = {
-                'Content-Type': str(mimetypes.guess_type(upload_path)),
-                # 'Content-MD5': str(md5sum),
-                'Content-Length': str(os.path.getsize(upload_path)),
-                'Content-Disposition': "attachment; filename=%s" % urllib.quote(os.path.basename(upload_path)),
-            }
-            requests.post(entry_receipt.edit_media, headers=headers, data=content, auth=(self.user, self.password))
+                # This replicates the sword2 behaviour but using requests for the basic auth
+                LOGGER.debug('Using requests')
+                headers = {
+                    'Content-Type': str(mimetypes.guess_type(upload_path)),
+                    # 'Content-MD5': str(md5sum),
+                    # 'Content-Length': str(os.path.getsize(upload_path)),
+                    'Content-Disposition': "attachment; filename=%s" % urllib.quote(os.path.basename(upload_path)),
+                }
+                requests.post(entry_receipt.edit_media, headers=headers, data=f, auth=(self.user, self.password))
 
         # Finalize deposit
         LOGGER.info('Complete deposit for %s', entry_receipt.edit)
