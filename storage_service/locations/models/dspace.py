@@ -203,7 +203,7 @@ class DSpace(models.Model):
         # TODO Should output dir be a temp dir?
         output_dir = os.path.dirname(input_path) + '/'
         dirname = os.path.splitext(os.path.basename(input_path))[0]
-        command = ['unar', '-force-overwrite', '-output-directory', output_dir, input_path]
+        command = ['7z', 'x', '-bd', '-y', '-o{0}'.format(output_dir), input_path]
         try:
             subprocess.check_call(command)
         except subprocess.CalledProcessError:
